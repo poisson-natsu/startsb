@@ -26,12 +26,15 @@ public class MailController {
     public String send(@RequestParam String sender,
                        @RequestParam String receiver,
                        @RequestParam String title,
-                       @RequestParam String text,
-                       @RequestParam MultipartFile file) {
+                       @RequestParam String text) {
 
-        String result = sendEmailService.send(sender, receiver, title, text);
-
-        System.out.println("file-content-type:"+file.getContentType());
+        String result = null;
+        try {
+            result = sendEmailService.send(sender, receiver, title, text);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = "failure";
+        }
 
         return result;
     }

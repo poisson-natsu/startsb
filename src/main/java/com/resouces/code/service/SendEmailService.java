@@ -27,25 +27,14 @@ public class SendEmailService {
     @Autowired
     JavaMailSender jms;
 
-    public String send(String sender, String receiver, String title, String text) {
+    public String send(String sender, String receiver, String title, String text) throws Exception {
 
-        SimpleMailMessage mainMessage = new SimpleMailMessage();
+        MimeMessage message = initMessage(sender, receiver, text);
+        //支持在内容中添加<br>来换行
+        message.setContent(text, "text/html;charset=utf-8");
+        jms.send(message);
 
-        mainMessage.setFrom(sender);
-
-        mainMessage.setTo(receiver);
-
-        mainMessage.setSubject(title);
-
-        mainMessage.setText(text);
-
-        try {
-            jms.send(mainMessage);
-            return "success";
-        }catch (Exception ex) {
-            System.out.println(ex.getLocalizedMessage());
-            return "failure";
-        }
+        return "success";
 
     }
 
@@ -64,12 +53,8 @@ public class SendEmailService {
 
     public String sendMultiMail(String sender, String receiver, String subject, String text, MultipartFile[] files) throws Exception {
 
-        MimeMessage message = jms.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        helper.setFrom(sender);
-        helper.setTo(receiver);
-        helper.setSubject(subject);
+        MimeMessage message = initMessage(sender, receiver, subject);
 
         Multipart multipart = new MimeMultipart("mixed");//multipart/mixed
         for (MultipartFile file : files) {
@@ -92,35 +77,16 @@ public class SendEmailService {
         return "send multi success";
     }
 
+    private MimeMessage initMessage(String sender, String receiver, String subject) throws MessagingException {
+        MimeMessage message = jms.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+        helper.setFrom(sender);
+        helper.setTo(receiver);
+        helper.setSubject(subject);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return message;
+    }
 
 
 }
